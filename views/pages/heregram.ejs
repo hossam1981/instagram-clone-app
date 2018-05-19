@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="Site">
+    <header>
+        <% include ../partials/header %>
+    </header>
+    <div class="Site-content"></div>
+    <div class="search">
+        <input type="text" name="search" placeholder="search" autofocus>
+        <i class="material-icons">search</i>
+    </div>
+        <div class="heregram-container">
+        
+            <% for (let i in rows) { %>
+                <div class="image-small">
+                    <img class="small" src="thumbnails/<%= rows[i].dataValues.image %>" />
+                </div>
+                <div class="image-large">
+                    <img class="large" width="90%" src="uploads/<%= rows[i].dataValues.image %>" />
+                </div>
+                <div id="heregram-fieldset">
+                    <fieldset>
+                        <label for=""><i class="material-icons">photo</i></label>
+                        <span><%= rows[i].dataValues.id %></span>
+                    </fieldset>
+                    <fieldset>
+                        <label for=""><i class="material-icons">description</i></label>
+                        <span><%= rows[i].dataValues.description %></span>
+                    </fieldset>
+                    <fieldset>
+                        <label for=""><i class="material-icons">verified_user</i></label>
+                        <span><%= rows[i].dataValues.username %></span>
+                    </fieldset>
+                    <fieldset>
+                            <label for=""><i class="material-icons">label</i></label>
+                            <span><%= rows[i].dataValues.tag %></span>
+                        </fieldset>
+                    <fieldset>
+                        <label for=""><i class="material-icons">comment</i></label>
+                        <span><%= rows[i].dataValues.comment %></span>
+                    </fieldset>
+                </div>
+                <div id="buttons-fieldset">
+                    <fieldset>
+                            <form class="buttons" method="POST" action="/add">
+                                <div class="buttons">
+                                    <button id="edit-btn">
+                                        <i class="material-icons">reply</i>
+                                    </button>
+                                </div>
+                            </form>
+                        <form class="buttons" method="POST" action="/edit/<%= rows[i].dataValues.id %>">
+                            <div class="buttons">
+                                <button id="edit-btn">
+                                    <i class="material-icons">edit</i>
+                                </button>
+                            </div>
+                        </form>
+                        <form class="buttons" method="POST" action="/delete/<%= rows[i].dataValues.id %>">
+                            <button id="delete-btn">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </form>
+                        <form class="buttons">
+                            <button id="update-btn">
+                                <i class="material-icons">refresh</i>
+                            </button>
+                        </form>
+                    </fieldset>
+                </div>
+            <%}%>
+        </div>
+    </div>
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</body>
+
+</html>

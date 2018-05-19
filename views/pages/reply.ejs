@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Reply Form</title>
+</head>
+<body>
+    <header>
+        <% include ../partials/header %>
+    </header>
+    <form method="POST" action="/add">
+        <div class="reply-select-div">
+            <fieldset>
+                <label for="">Username:</label>
+                <input name="username" type="text">
+            </fieldset>
+            <fieldset>
+                <label for="">Comment:</label>
+                <textarea name="comment" type="text"></textarea>
+            </fieldset>
+            <button>Submit</button>
+        </div>
+    </form>
+</body>
+</html>

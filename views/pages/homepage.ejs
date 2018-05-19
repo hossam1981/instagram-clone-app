@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Home Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/style/style.css" rel="stylesheet">
+    </head>
+    <body class="Site">
+            <header>
+                <% include ../partials/header %>
+            </header>
+            <h1>Welcome to the Home Page</h1>
+                <p>You are logged in <%= user.username %></p>
+        
+                <a href="/logout"><button>Logout</button></a>
+        
+                <a href="/profile"><button>Get Profile</button></a>
+            <footer>
+                <% include ../partials/footer %>
+            </footer>
+        </body>
+</html>
