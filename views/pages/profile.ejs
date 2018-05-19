@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Profile Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/style/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <% include ../partials/header %>
+        </header>
+        <h1><u>Profile Page</u></h1>
+        <strong>ID: </strong> <%= user.id %><br>
+        <strong>Last Name: </strong> <%= user.firstname %><br>
+        <strong>First Name: </strong> <%= user.lastname %><br>
+        <strong>Username: </strong> <%= user.username %><br>
+        <strong>Password: </strong> <%= user.password %><br>
+        <strong>Email: </strong> <%= user.email %><br>
+        <strong>Joined: </strong> <%= user.created_at %><br>
+        <a href="/logout"><button>Logout</button></a>
+    </body>
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+</html>
