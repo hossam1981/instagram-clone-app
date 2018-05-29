@@ -8,7 +8,7 @@ const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const LocalStrategy = require('passport-local').Strategy
 const dotenv = require('dotenv');
-
+// add 
 dotenv.load();
 
 // table that passport creates. it is a passport helper
