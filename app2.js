@@ -1,14 +1,17 @@
-const express = require('express')
-const ejs = require('ejs')
-const Sequelize = require('sequelize')
-const bodyParser = require('body-parser')
-const PORT = process.env.PORT || 3000
+const express = require('express');
+const ejs = require('ejs');
+const multer = require('multer');
+const path = require('path');
+const sharp = require('sharp');
+const bodyParser = require('body-parser');
+const PORT = process.env.PORT || 3000;
 const passport = require('passport')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const LocalStrategy = require('passport-local').Strategy
+const pg = require('pg');
+const Sequelize = require('sequelize');
 const dotenv = require('dotenv');
-
 dotenv.load();
 
 // table that passport creates. it is a passport helper
@@ -16,10 +19,11 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store)
 
 // define environment variables
 const db_name = process.env.DB_NAME;
-const db_pass = process.env.DB_PASS;
 const db_user = process.env.DB_USER;
+const db_pass = process.env.DB_PASS;
 
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
+
 const sequelize = new Sequelize(db_name, db_user, db_pass, {
     host: 'localhost',
     port: '5432',
@@ -33,26 +37,27 @@ const sequelize = new Sequelize(db_name, db_user, db_pass, {
     }
 })
 
+// user registration/login related
 const User = sequelize.define('user', {
-    firstname: Sequelize.STRING,
     lastname: Sequelize.STRING,
+    firstname: Sequelize.STRING,
     username: Sequelize.STRING,
     password: Sequelize.STRING,
+    cell: Sequelize.STRING,
     email: Sequelize.STRING,
-    createdAt: Sequelize.DATE,
-    updatedAt: Sequelize.DATE
+    comment: Sequelize.STRING,
+    tag: Sequelize.STRING
 })
 
 
 const sessionStore = new SequelizeStore({
     db: sequelize
-});
+})
 
 sequelize.sync()
 sessionStore.sync();
 
 const app = express()
-
 
 //===============Sessions======================== 
 /*
@@ -60,7 +65,6 @@ In a typical web application, the credentials used to authenticate
   a user will only be transmitted during the login request. 
   If authentication succeeds, a session will be established and 
   maintained via a cookie set in the user's browser.
-
 Each subsequent request will not contain credentials, but rather
  the unique cookie that identifies the session. In order to support 
  login sessions, Passport will serialize and deserialize user 
@@ -76,7 +80,7 @@ passport.serializeUser(function(user, done) {
 //convert id in cookie to user details
 passport.deserializeUser(function(obj, done) {
     console.log("--deserializeUser--");
-    console.log(obj)
+    console.log(obj);
     done(null, obj);
 })
 
@@ -112,11 +116,11 @@ function processSignupCallback(req, username, password, done) {
                     .then((user) => {
                         //once user is created call done with the created user
                         // createdRecord.password = undefined;
-                        console.log("Yay!!! User created")
-                            // console.log(user)
+                        console.log("Yay!!! User created");
+
+                        // console.log(user)
                         return done(null, user);
                     })
-
             }
         })
 }
@@ -145,14 +149,13 @@ function processLoginCallback(req, username, password, done) {
             } else if (password !== user.password) {
                 return done(null, false)
             } else {
-                console.log("Yay!!! User is logged in")
-                    // console.log(user)
+                console.log("Yay!!! User is logged in.");
+
+                // console.log(user)
                 return done(null, user);
             }
         })
-
 }
-
 
 app.use(require('morgan')('combined'));
 app.set('view engine', 'ejs')
@@ -179,8 +182,6 @@ login sessions, passport.session() middleware must also be used.
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
 //=========Routes==================
 app.get('/', (req, res) => {
     if (req.user) {
@@ -188,7 +189,7 @@ app.get('/', (req, res) => {
             user: req.user
         })
     } else {
-        res.redirect('/login')
+        res.redirect('pages/login')
     }
 })
 
@@ -201,15 +202,15 @@ app.post('/signup', function(req, res, next) {
         if (err) {
             return next(err);
         } else {
-            return res.redirect('/login')
+            return res.redirect('pages/login')
         }
     })(req, res, next);
-});
+})
 
 app.post('/login', function(req, res, next) {
     passport.authenticate('local-login', function(err, user) {
         console.log("Another login for user  :" + req.user)
-        if (err || user == false) {
+        if (err || user === false) {
             return res.render('pages/login', {
                 message: "Incorrect Username/Password"
             })
@@ -231,27 +232,191 @@ app.get('/login', (req, res) => {
     })
 })
 
-app.get('/profile',
-    require('connect-ensure-login').ensureLoggedIn(),
-    function(req, res) {
-        console.log("****The req.user****" + req.user)
-        User.findById(req.user.id).then((user) => {
-            res.render('pages/profile', {
-                user: user.dataValues
-            });
-        })
+app.get('/profile', require('connect-ensure-login').ensureLoggedIn(), function(req, res) {
+    console.log("****The req.user****" + req.user)
+    User.findById(req.user.id).then((user) => {
+        res.render('pages/profile', {
+            user: user.dataValues
+        });
     })
+})
 
 app.get('/logout', function(req, res) {
-    console.log("*****Loging out*****")
+    console.log("*****Logging out*****");
 
     // deletes your session in your db. comes from passport and works in
     // conjunction with express sessions.
     req.session.destroy()
     req.logout();
-    res.redirect('/login');
+    res.redirect('pages/login');
+})
+
+// pic related
+const Pic = sequelize.define('pic', {
+    description: Sequelize.STRING,
+    image: Sequelize.STRING,
+    tag: Sequelize.STRING,
+    comment: Sequelize.STRING
+})
+
+const Tag = sequelize.define('tag', {
+    tag: Sequelize.STRING,
+    username: Sequelize.STRING
+})
+
+Pic.hasMany(Tag);
+Tag.belongsTo(Pic);
+
+const ReplyComment = sequelize.define('replycomment', {
+    comment: Sequelize.STRING,
+    username: Sequelize.STRING
+})
+
+const UserPic = sequelize.define('userpic', {})
+
+Pic.hasMany(ReplyComment);
+ReplyComment.belongsTo(Pic);
+
+User.belongsToMany(Pic, {
+    through: UserPic
+});
+Pic.belongsToMany(User, {
+    through: UserPic
+});
+
+sequelize.sync();
+
+// storage object definition
+// where to store files and how to name them
+
+const storage = multer.diskStorage({
+    destination: './public/uploads',
+    filename: (req, file, cb) => {
+        // fieldnmae is name="photo", - "154461".jpg. naming convention 
+        // has to be unique.
+        // Date.now() would be different for everyone.
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    }
+})
+
+// upload process definition
+const upload = multer({
+    storage: storage
+}).single('image');
+
+// const app = express();
+app.set('view engine', 'ejs');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}))
+
+app.use(express.static('public'));
+
+let description;
+let username;
+let tag;
+let comment;
+
+// get route
+app.get('/heregram', (req, res) => {
+    Pic.findAll().then((rows) => {
+        return rows
+    })
+    .then((rows) => {
+        return res.render('pages/heregram', {rows, description, username, tag, comment })
+    })
+})
+
+// upload route
+app.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if(err) {
+            console.log(err);
+        }
+        console.log(req.body);
+        console.log(req.file);
+        console.log('File for sharp ' + req.file.path);
+
+        sharp(req.file.path)
+        .resize(100, 100)
+        .toFile('public/thumbnails/' + req.file.filename, (err) => {
+
+        })
+        Pic.create({
+            description: req.body.description,
+            username: req.body.username,
+            image: req.file.filename,
+            tag: req.body.tag,
+            comment: req.body.comment
+        })
+        .then(() => {
+            return res.redirect('/heregram');
+        })
+    })
+})
+
+// render edit-upload page
+app.post('/edit/:id', (req, res) => {
+    let id = req.params.id;
+    Pic.findById(id)
+    .then(row => {
+        return row
+    })
+    .then(row => res.render('pages/edit-upload', {
+        row
+    }))
+})
+
+// update upload
+app.post('/update/:id', (req, res) => {
+    let id = req.params.id;
+    Pic.findById(id)
+    .then((row) => row.update({
+        description: req.body.description,
+        username: req.body.username,
+        tag: req.body.tag,
+        comment: req.body.comment
+    }))
+    return res.redirect('/heregram');
+})
+
+// delete image
+app.post('/delete/:id', (req, res) => {
+    let id = req.params.id;
+    Pic.findById(id)
+    .then((row) => row.destroy({
+        where: {
+            id: req.params.id
+        }
+    }))
+    .then((row) => row.update({
+        description: req.body.description,
+        username: req.body.username,
+        tag: req.body.tag,
+        comment: req.body.comment
+    }))
+    return res.redirect('/heregram');
+})
+
+// render add reply pages
+app.get('/reply', (req, res) => {
+    res.render('pages/reply');
+})
+
+// add reply to user comment
+app.post('/add', (req, res) => {
+    let id = req.body.id;
+    User.findById(id)
+    User.create({
+        username: req.body.username,
+        comment: req.body.comment
+    })
+    .then(() => {
+        res.redirect('/heregram');
+    })
 })
 
 app.listen(PORT, () => {
-    console.log("Passport sequelize app server started...")
+    console.log(`Server running on port ${PORT} ...`);
 })

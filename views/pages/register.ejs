@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Register Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/style/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <% include ../partials/header %>
+        </header>
+        <h1>Registration Page</h1>
+
+        <form method="POST" action="/signup">
+            <fieldset>
+                <label>First Name: </label><input type="text" name="firstname">
+            </fieldset>
+            <fieldset>
+                <label>Last Name: </label><input type="text" name="lastname">
+            </fieldset>
+            <fieldset>
+                <label>Username: </label><input type="text" name="username">
+            </fieldset>
+            <fieldset>
+                <label>Password: </label><input type="password" name="password">
+            </fieldset>
+            <fieldset>
+                <label>Email: </label><input type="text" name="email">
+            </fieldset>
+            <fieldset>
+                <label>Joined: </label><input type="text" name="createdAt">
+            </fieldset>
+            <br>
+            <button>Submit</button>
+        </form>
+    
+    </body>
+</html>

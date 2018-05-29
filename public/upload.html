@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Upload Page</title>
+</head>
+<body class="Site">
+    <header>
+        <nav class='nav'>
+            <ul class='heregram'>
+                <li class='home'>
+                    <a href='/'>Heregram</a>
+                </li>
+                <li class='gallery'>
+                    <a href='/'>
+                        <i class="material-icons">photo_album</i>
+                    </a>
+                </li>
+                <li class='upload-photo'>
+                    <a href='/upload.html'>
+                        <i class="material-icons">file_upload</i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="Site-content">
+        <div class="upload-container">
+            <h2>Upload Form</h2>
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <div class="upload-select-div">
+                    <label for="">Description:</label>
+                    <input type="text" name="description">
+                    <br><br><label for="">Username:</label>
+                    <input type="text" name="username">
+                    <br><br><label for="">Tag:</label>
+                    <input type="text" name="tag">
+                    <br><br><label for="">Comment:</label>
+                    <textarea type="text" name="comment"></textarea>
+                    <br><br><label>File:</label>
+                    <input type="file" name="image">
+                </div>
+                <button id="send"><i class="material-icons">send</i></button>
+            </form>
+
+        </div>
+
+    </div>
+
+    <footer></footer>
+
+    
+</body>
+</html>
